@@ -62,7 +62,7 @@ fn main() {
             };
         }
 
-        let hashed_result = MD5::hash_data(&mut data);
+        let hashed_result = MD5::hash_slice(&mut data);
         if counter != 0 {
             println!("{} {}", hashed_result, args[counter]);
         } else {
