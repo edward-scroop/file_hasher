@@ -1,3 +1,6 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
+// SPDX-FileCopyrightText: Copyright 2025 Edward Scroop <edward.scroop@gmail.com>
+
 use crate::hash_algorithm::Hash;
 
 // 64 constants calculated as 'Let T[i] denote the i-th element of the table, which is equal to the integer part
