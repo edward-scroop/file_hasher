@@ -1,7 +1,12 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 // SPDX-FileCopyrightText: Copyright 2025 Edward Scroop <edward.scroop@gmail.com>
 
-use crate::hash_algorithm::{Hash, md5::MD5, sha1::SHA1};
+use crate::hash_algorithm::{
+    Hash,
+    md5::MD5,
+    sha1::SHA1,
+    sha2::{SHA224, SHA256, SHA384, SHA512, SHA512_224, SHA512_256},
+};
 use std::{
     env::{self},
     fmt::Display,
@@ -36,25 +41,37 @@ Mandatory arguments to long options are mandatory for short options too.
 
 DIGEST determines the digest algorithm and default output format:
     md5
-    sha1";
-const HELP_INFO_STRING: &str = "Try \'hashsum --help\' for more information.";
+    sha1
+    sha224
+    sha256
+    sha384
+    sha512
+    sha512224
+    sha512256";
+const HELP_INFO_STRING: &str = "Try 'hashsum --help' for more information.";
 const HELP_ALGORITHM_ARGUMENTS: &str = "Valid arguments are:
-    - \'md5\'
-    - \'sha1\'";
+    - 'md5'
+    - 'sha1'
+    - 'sha224'
+    - 'sha256'
+    - 'sha384'
+    - 'sha512'
+    - 'sha512224'
+    - 'sha512256'";
 
 fn print_help_unrecognised_option(arg: impl Display) {
-    println!("hashsum: unrecognised option \'{arg}\'\n{HELP_INFO_STRING}");
+    println!("hashsum: unrecognised option '{arg}'\n{HELP_INFO_STRING}");
     process::exit(1);
 }
 
 fn print_help_invalid_option(arg: impl Display) {
-    println!("hashsum: invalid option -- \'{arg}\'\n{HELP_INFO_STRING}");
+    println!("hashsum: invalid option -- '{arg}'\n{HELP_INFO_STRING}");
     process::exit(1);
 }
 
 fn print_help_invalid_argument(arg: impl Display, option: impl Display, valid_arguments: &str) {
     println!(
-        "hashsum: invalid argument \'{arg}\' for \'{option}\'\n{valid_arguments}\n{HELP_INFO_STRING}"
+        "hashsum: invalid argument '{arg}' for '{option}'\n{valid_arguments}\n{HELP_INFO_STRING}"
     );
     process::exit(1);
 }
@@ -88,6 +105,12 @@ struct State {
 enum Algorithm {
     MD5,
     SHA1,
+    SHA224,
+    SHA256,
+    SHA384,
+    SHA512,
+    SHA512_224,
+    SHA512_256,
 }
 
 impl State {
@@ -120,6 +143,12 @@ impl State {
                             Some(arg) => match arg.as_str() {
                                 "md5" => Algorithm::MD5,
                                 "sha1" => Algorithm::SHA1,
+                                "sha224" => Algorithm::SHA224,
+                                "sha256" => Algorithm::SHA256,
+                                "sha384" => Algorithm::SHA384,
+                                "sha512" => Algorithm::SHA512,
+                                "sha512224" => Algorithm::SHA512_224,
+                                "sha512256" => Algorithm::SHA512_256,
                                 _ => {
                                     print_help_invalid_argument(
                                         arg,
@@ -140,6 +169,12 @@ impl State {
                         algorithm = match &argument[2..argument.len()] {
                             "md5" => Algorithm::MD5,
                             "sha1" => Algorithm::SHA1,
+                            "sha224" => Algorithm::SHA224,
+                            "sha256" => Algorithm::SHA256,
+                            "sha384" => Algorithm::SHA384,
+                            "sha512" => Algorithm::SHA512,
+                            "sha512224" => Algorithm::SHA512_224,
+                            "sha512256" => Algorithm::SHA512_256,
                             _ => {
                                 print_help_invalid_argument(
                                     argument,
@@ -183,6 +218,12 @@ impl State {
                         Some(arg) => match arg.as_str() {
                             "md5" => Algorithm::MD5,
                             "sha1" => Algorithm::SHA1,
+                            "sha224" => Algorithm::SHA224,
+                            "sha256" => Algorithm::SHA256,
+                            "sha384" => Algorithm::SHA384,
+                            "sha512" => Algorithm::SHA512,
+                            "sha512224" => Algorithm::SHA512_224,
+                            "sha512256" => Algorithm::SHA512_256,
                             _ => {
                                 print_help_invalid_argument(
                                     arg,
@@ -213,6 +254,12 @@ impl State {
                         algorithm = match &argument[12..argument.len()] {
                             "md5" => Algorithm::MD5,
                             "sha1" => Algorithm::SHA1,
+                            "sha224" => Algorithm::SHA224,
+                            "sha256" => Algorithm::SHA256,
+                            "sha384" => Algorithm::SHA384,
+                            "sha512" => Algorithm::SHA512,
+                            "sha512224" => Algorithm::SHA512_224,
+                            "sha512256" => Algorithm::SHA512_256,
                             _ => {
                                 print_help_invalid_argument(
                                     &argument[12..argument.len()],
@@ -269,10 +316,19 @@ fn main() {
             }
 
             data = stdin.clone().into_bytes();
-            hashed_result = match state.algorithm {
-                Algorithm::MD5 => MD5::hash_slice(&mut data),
-                Algorithm::SHA1 => SHA1::hash_slice(&mut data),
-            }
+
+            let hash_function = match state.algorithm {
+                Algorithm::MD5 => MD5::hash_slice,
+                Algorithm::SHA1 => SHA1::hash_slice,
+                Algorithm::SHA224 => SHA224::hash_slice,
+                Algorithm::SHA256 => SHA256::hash_slice,
+                Algorithm::SHA384 => SHA384::hash_slice,
+                Algorithm::SHA512 => SHA512::hash_slice,
+                Algorithm::SHA512_224 => SHA512_224::hash_slice,
+                Algorithm::SHA512_256 => SHA512_256::hash_slice,
+            };
+
+            hashed_result = hash_function(&mut data);
         } else {
             // Read data from file passed as argument
             let file_handle = match File::open(&state.arguments[counter]) {

@@ -188,6 +188,10 @@ impl Hash for SHA1 {
             }
         }
 
+        if context.hash == None {
+            context = Self::hash_block(context, &[])
+        }
+
         // Cannot panic as a hash will always be produced.
         return Ok(context.hash.unwrap());
     }
