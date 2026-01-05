@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
-// SPDX-FileCopyrightText: Copyright 2025 Edward Scroop <edward.scroop@gmail.com>
+// SPDX-FileCopyrightText: Copyright 2025-2026 Edward Scroop <edward.scroop@gmail.com>
 
 use crate::hash_algorithm::{
     Hash,
