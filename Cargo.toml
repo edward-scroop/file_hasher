@@ -19,6 +19,7 @@ codegen-units = 256
 [profile.release]
 opt-level = 3
 debug = "full"
+split-debuginfo = "packed"
 strip = "none"
 lto = "thin"
 panic = "abort"

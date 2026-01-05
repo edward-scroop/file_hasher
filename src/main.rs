@@ -60,33 +60,33 @@ const HELP_ALGORITHM_ARGUMENTS: &str = "Valid arguments are:
     - 'sha512256'";
 
 fn print_help_unrecognised_option(arg: impl Display) {
-    println!("hashsum: unrecognised option '{arg}'\n{HELP_INFO_STRING}");
+    eprintln!("hashsum: unrecognised option '{arg}'\n{HELP_INFO_STRING}");
     process::exit(1);
 }
 
 fn print_help_invalid_option(arg: impl Display) {
-    println!("hashsum: invalid option -- '{arg}'\n{HELP_INFO_STRING}");
+    eprintln!("hashsum: invalid option -- '{arg}'\n{HELP_INFO_STRING}");
     process::exit(1);
 }
 
 fn print_help_invalid_argument(arg: impl Display, option: impl Display, valid_arguments: &str) {
-    println!(
+    eprintln!(
         "hashsum: invalid argument '{arg}' for '{option}'\n{valid_arguments}\n{HELP_INFO_STRING}"
     );
     process::exit(1);
 }
 fn print_help_option_requires_argument(arg: impl Display) {
-    println!("hashsum: option requires an argument -- '{arg}'\n{HELP_INFO_STRING}");
+    eprintln!("hashsum: option requires an argument -- '{arg}'\n{HELP_INFO_STRING}");
     process::exit(1);
 }
 
 fn print_help() {
-    println!("{HELP_STRING}");
+    eprintln!("{HELP_STRING}");
     process::exit(0);
 }
 
 fn print_version() {
-    println!(
+    eprintln!(
         "hashsum version {VERSION_MAJOR}.{VERSION_MIN}.{VERSION_PATCH}
 hashsum comes with ABSOLUTELY NO WARRANTY.  This is free software, and you
 are welcome to redistribute it under certain conditions.  See the GNU
