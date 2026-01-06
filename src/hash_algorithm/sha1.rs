@@ -20,11 +20,11 @@ struct SHA1Context {
 impl Default for SHA1Context {
     fn default() -> Self {
         Self {
-            a: 0x67_45_23_01_u32,
-            b: 0xEF_CD_AB_89_u32,
-            c: 0x98_BA_DC_FE_u32,
-            d: 0x10_32_54_76_u32,
-            e: 0xC3_D2_E1_F0_u32,
+            a: 0x67_45_23_01u32,
+            b: 0xEF_CD_AB_89u32,
+            c: 0x98_BA_DC_FEu32,
+            d: 0x10_32_54_76u32,
+            e: 0xC3_D2_E1_F0u32,
             total_data_size_bits: 0,
             non_zero_padding_required: true,
             padded: false,
@@ -48,7 +48,7 @@ impl SHA1 {
         // Pad only is block is less than 512 bits.
         if original_data_block.len() != 64 {
             // Add padding
-            let mut padding = [0x00_u8; 56];
+            let mut padding = [0x00u8; 56];
             let mut padding_bytes = 56;
 
             // Add non zero padding unless current block has no data / end of stream.
@@ -107,16 +107,16 @@ impl SHA1 {
 
             if i < 20 {
                 f = (temp_b & temp_c) | (!temp_b & temp_d);
-                k = 0x5A827999_u32;
+                k = 0x5A827999u32;
             } else if i < 40 {
                 f = temp_b ^ temp_c ^ temp_d;
-                k = 0x6ED9EBA1_u32;
+                k = 0x6ED9EBA1u32;
             } else if i < 60 {
                 f = (temp_b & temp_c) | (temp_b & temp_d) | (temp_c & temp_d);
-                k = 0x8F1BBCDC_u32;
+                k = 0x8F1BBCDCu32;
             } else {
                 f = temp_b ^ temp_c ^ temp_d;
-                k = 0xCA62C1D6_u32;
+                k = 0xCA62C1D6u32;
             }
 
             //temp_word = (a leftrotate 5) + f + e + k + words[i]

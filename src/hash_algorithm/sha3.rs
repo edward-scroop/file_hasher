@@ -3,11 +3,6 @@
 
 use crate::hash_algorithm::Hash;
 
-pub struct SHA3_224 {}
-pub struct SHA3_256 {}
-pub struct SHA3_384 {}
-pub struct SHA3_512 {}
-
 fn rol64(a: u64, offset: usize) -> u64 {
     (a << offset) ^ (a >> (64 - offset))
 }
@@ -52,17 +47,18 @@ fn xor_lane(state: &mut [u8], x: usize, y: usize, lane: u64) {
 
 fn lfsr86540(lfsr: &mut u8) -> bool {
     let result = ((*lfsr) & 0x01) != 0;
+
     if ((*lfsr) & 0x80) != 0 {
-        /* Primitive polynomial over GF(2): x^8+x^6+x^5+x^4+1 */
         (*lfsr) = ((*lfsr) << 1) ^ 0x71;
     } else {
         (*lfsr) <<= 1;
     }
+
     result
 }
 
 fn keccak_f1600_state_permute(state: &mut [u8]) {
-    let mut lfsr_state = 0x01_u8;
+    let mut lfsr_state = 0x01u8;
 
     for _ in 0..24 {
         let mut c = [0u64; 5];
@@ -77,9 +73,8 @@ fn keccak_f1600_state_permute(state: &mut [u8]) {
         }
 
         for x in 0..5 {
-            /* Compute the θ effect for a given column */
             d = c[(x + 4) % 5] ^ rol64(c[(x + 1) % 5], 1);
-            /* Add the θ effect to the whole column */
+
             for y in 0..5 {
                 xor_lane(state, x, y, d);
             }
@@ -90,27 +85,25 @@ fn keccak_f1600_state_permute(state: &mut [u8]) {
         let mut current = read_lane(state, x, y);
         let mut temp: u64;
 
-        /* Iterate over ((0 1)(2 3))^t * (1 0) for 0 ≤ t ≤ 23 */
         for t in 0..24 {
-            /* Compute the rotation constant r = (t+1)(t+2)/2 */
             let r = ((t + 1) * (t + 2) / 2) % 64;
-            /* Compute ((0 1)(2 3)) * (x y) */
             let temp_y = (2 * x + 3 * y) % 5;
+
             x = y;
             y = temp_y;
-            /* Swap current and state(x,y), and rotate */
+
             temp = read_lane(state, x, y);
             write_lane(state, x, y, rol64(current, r));
+
             current = temp;
         }
-        let mut temp = [0u64; 5];
 
+        let mut temp = [0u64; 5];
         for y in 0..5 {
-            /* Take a copy of the plane */
             for (x, temp_lane) in temp.iter_mut().enumerate() {
                 *temp_lane = read_lane(state, x, y);
             }
-            /* Compute χ on the plane */
+
             for x in 0..5 {
                 write_lane(
                     state,
@@ -123,6 +116,7 @@ fn keccak_f1600_state_permute(state: &mut [u8]) {
 
         for j in 0..7 {
             let bit_position: usize = (1 << j) - 1;
+
             if lfsr86540(&mut lfsr_state) {
                 xor_lane(state, 0, 0, 1u64 << bit_position);
             }
@@ -130,133 +124,327 @@ fn keccak_f1600_state_permute(state: &mut [u8]) {
     }
 }
 
-fn keccakf1600(
-    rate: usize,
+pub struct SHA3_224 {}
+pub struct SHA3_256 {}
+pub struct SHA3_384 {}
+pub struct SHA3_512 {}
+
+struct Context {
+    state: Box<[u8; 200]>,
+    rate_in_bytes: usize,
     capacity: usize,
-    message: &[u8],
+    digest_byte_size: usize,
     delimited_suffix: u8,
-    mut digest_byte_size: usize,
-) -> Vec<u8> {
-    assert!(rate.is_multiple_of(8), "Rate must be divisible by 8.");
+}
+
+impl Default for Context {
+    fn default() -> Self {
+        Self {
+            state: Box::new([0u8; 200]),
+            rate_in_bytes: 72,
+            capacity: 1024,
+            digest_byte_size: 64,
+            delimited_suffix: 0x06,
+        }
+    }
+}
+
+fn keccakf1600_absorb(mut context: Context, block: &[u8]) -> Context {
     assert!(
-        rate + capacity == 1600,
+        context.rate_in_bytes.is_multiple_of(8),
+        "Rate must be divisible by 8."
+    );
+    assert!(
+        (context.rate_in_bytes * 8) + context.capacity == 1600,
         "Rate and capacity must add to 1600 bits."
     );
 
-    let rate_in_bytes = rate / 8;
-    let mut state = [0u8; 200];
+    let input_bytes = block.len();
+
+    // Load chunks of message size rate in bytes into state.
+    let block_size = if input_bytes < context.rate_in_bytes {
+        input_bytes
+    } else {
+        context.rate_in_bytes
+    };
+
+    for (i, block) in block.iter().enumerate().take(block_size) {
+        context.state[i] ^= block;
+    }
+
+    if block_size == context.rate_in_bytes {
+        keccak_f1600_state_permute(context.state.as_mut());
+    } else {
+        context.state[block_size] ^= context.delimited_suffix;
+        if ((context.delimited_suffix & 0x80) != 0) && (block_size == (context.rate_in_bytes - 1)) {
+            keccak_f1600_state_permute(context.state.as_mut());
+        }
+
+        context.state[context.rate_in_bytes - 1] ^= 0x80;
+        keccak_f1600_state_permute(context.state.as_mut());
+    }
+
+    context
+}
+
+fn keccakf1600_squeeze(mut context: Context) -> String {
+    assert!(
+        context.rate_in_bytes.is_multiple_of(8),
+        "Rate must be divisible by 8."
+    );
+    assert!(
+        (context.rate_in_bytes * 8) + context.capacity == 1600,
+        "Rate and capacity must add to 1600 bits."
+    );
+
+    let mut return_string = String::new();
+
+    while context.digest_byte_size > 0 {
+        let block_size = if context.digest_byte_size < context.rate_in_bytes {
+            context.digest_byte_size
+        } else {
+            context.rate_in_bytes
+        };
+
+        for byte in &context.state[0..block_size] {
+            return_string.push_str(&format!("{:02x}", byte));
+        }
+        context.digest_byte_size -= block_size;
+
+        if context.digest_byte_size > 0 {
+            keccak_f1600_state_permute(context.state.as_mut());
+        }
+    }
+
+    return_string
+}
+
+fn keccakf1600(mut context: Context, message: &[u8]) -> String {
+    assert!(
+        context.rate_in_bytes.is_multiple_of(8),
+        "Rate must be divisible by 8."
+    );
+    assert!(
+        (context.rate_in_bytes * 8) + context.capacity == 1600,
+        "Rate and capacity must add to 1600 bits."
+    );
+
     let (mut input_index, mut block_size) = (0, 0);
     let mut input_bytes = message.len();
-    let mut digest = Vec::with_capacity(digest_byte_size);
+    let mut return_string = String::new();
 
     // Load chunks of message size rate in bytes into state.
     while input_bytes > 0 {
-        block_size = if input_bytes < rate_in_bytes {
+        block_size = if input_bytes < context.rate_in_bytes {
             input_bytes
         } else {
-            rate_in_bytes
+            context.rate_in_bytes
         };
 
         for i in 0..block_size {
-            state[i] ^= message[input_index + i];
+            context.state[i] ^= message[input_index + i];
         }
         input_index += block_size;
         input_bytes -= block_size;
 
-        if block_size == rate_in_bytes {
-            keccak_f1600_state_permute(&mut state);
+        if block_size == context.rate_in_bytes {
+            keccak_f1600_state_permute(context.state.as_mut());
             block_size = 0;
         }
     }
 
-    state[block_size] ^= delimited_suffix;
+    context.state[block_size] ^= context.delimited_suffix;
     /* If the first bit of padding is at position rate-1, we need a whole new block for the second bit of padding */
-    if ((delimited_suffix & 0x80) != 0) && (block_size == (rate_in_bytes - 1)) {
-        keccak_f1600_state_permute(&mut state);
+    if ((context.delimited_suffix & 0x80) != 0) && (block_size == (context.rate_in_bytes - 1)) {
+        keccak_f1600_state_permute(context.state.as_mut());
     }
     /* Add the second bit of padding */
-    state[rate_in_bytes - 1] ^= 0x80;
+    context.state[context.rate_in_bytes - 1] ^= 0x80;
     /* Switch to the squeezing phase */
-    keccak_f1600_state_permute(&mut state);
+    keccak_f1600_state_permute(context.state.as_mut());
 
-    while digest_byte_size > 0 {
-        let block_size = if digest_byte_size < rate_in_bytes {
-            digest_byte_size
+    while context.digest_byte_size > 0 {
+        let block_size = if context.digest_byte_size < context.rate_in_bytes {
+            context.digest_byte_size
         } else {
-            rate_in_bytes
+            context.rate_in_bytes
         };
-        digest.extend_from_slice(&state[0..block_size]);
-        digest_byte_size -= block_size;
 
-        if digest_byte_size > 0 {
-            keccak_f1600_state_permute(&mut state);
+        for byte in &context.state[0..block_size] {
+            return_string.push_str(&format!("{:02x}", byte));
+        }
+        context.digest_byte_size -= block_size;
+
+        if context.digest_byte_size > 0 {
+            keccak_f1600_state_permute(context.state.as_mut());
         }
     }
 
-    digest
+    return_string
 }
 
 impl Hash for SHA3_224 {
     fn hash_slice(message: &[u8]) -> String {
-        let test = keccakf1600(1152, 448, message, 0x06, 28);
+        let mut context = Context {
+            rate_in_bytes: 144,
+            capacity: 448,
+            digest_byte_size: 28,
+            ..Default::default()
+        };
+        //let mut iter = message.chunks(context.rate_in_bytes);
 
-        let mut return_string = String::new();
-        for byte in test.iter() {
-            return_string.push_str(&format!("{:02x}", byte));
-        }
-        return_string
+        //loop {
+        //    let chunk = iter.next();
+
+        //    context = keccakf1600_absorb(context, chunk.unwrap_or(&[]));
+
+        //    if chunk.is_none() {
+        //        break;
+        //    }
+        //}
+
+        keccakf1600(context, message)
     }
 
     fn hash_stream(mut stream: impl std::io::Read) -> std::io::Result<String> {
-        todo!()
+        let mut context = Context {
+            rate_in_bytes: 144,
+            capacity: 448,
+            digest_byte_size: 28,
+            ..Default::default()
+        };
+        let mut buffer = Vec::with_capacity(context.rate_in_bytes);
+
+        loop {
+            let bytes = stream.read(buffer.as_mut())?;
+            context = keccakf1600_absorb(context, &buffer[0..bytes]);
+
+            if bytes < context.rate_in_bytes {
+                break;
+            }
+        }
+
+        Ok(keccakf1600_squeeze(context))
     }
 }
 
 impl Hash for SHA3_256 {
     fn hash_slice(message: &[u8]) -> String {
-        let test = keccakf1600(1088, 512, message, 0x06, 32);
+        let mut context = Context {
+            rate_in_bytes: 136,
+            capacity: 512,
+            digest_byte_size: 32,
+            ..Default::default()
+        };
+        //let mut iter = message.chunks(context.rate_in_bytes);
 
-        let mut return_string = String::new();
-        for byte in test.iter() {
-            return_string.push_str(&format!("{:02x}", byte));
-        }
-        return_string
+        //loop {
+        //    let chunk = iter.next();
+
+        //    context = keccakf1600_absorb(context, chunk.unwrap_or(&[]));
+
+        //    if chunk.is_none() {
+        //        break;
+        //    }
+        //}
+
+        keccakf1600(context, message)
     }
 
     fn hash_stream(mut stream: impl std::io::Read) -> std::io::Result<String> {
-        todo!()
+        let mut context = Context {
+            rate_in_bytes: 136,
+            capacity: 512,
+            digest_byte_size: 32,
+            ..Default::default()
+        };
+        let mut buffer = vec![0u8; context.rate_in_bytes];
+
+        loop {
+            let bytes = stream.read(buffer.as_mut())?;
+            context = keccakf1600_absorb(context, &buffer[0..bytes]);
+
+            if bytes < context.rate_in_bytes {
+                break;
+            }
+        }
+
+        Ok(keccakf1600_squeeze(context))
     }
 }
 
 impl Hash for SHA3_384 {
     fn hash_slice(message: &[u8]) -> String {
-        let test = keccakf1600(832, 768, message, 0x06, 48);
+        let mut context = Context {
+            rate_in_bytes: 104,
+            capacity: 768,
+            digest_byte_size: 48,
+            ..Default::default()
+        };
 
-        let mut return_string = String::new();
-        for byte in test.iter() {
-            return_string.push_str(&format!("{:02x}", byte));
-        }
-        return_string
+        //for chunk in message.chunks(context.rate_in_bytes) {
+        //    context = keccakf1600_absorb(context, chunk);
+        //}
+
+        keccakf1600(context, message)
     }
 
     fn hash_stream(mut stream: impl std::io::Read) -> std::io::Result<String> {
-        todo!()
+        let mut context = Context {
+            rate_in_bytes: 104,
+            capacity: 768,
+            digest_byte_size: 48,
+            ..Default::default()
+        };
+        let mut buffer = vec![0u8; context.rate_in_bytes];
+
+        loop {
+            let bytes = stream.read(buffer.as_mut())?;
+            context = keccakf1600_absorb(context, &buffer[0..bytes]);
+
+            if bytes < context.rate_in_bytes {
+                break;
+            }
+        }
+
+        Ok(keccakf1600_squeeze(context))
     }
 }
 
 impl Hash for SHA3_512 {
     fn hash_slice(message: &[u8]) -> String {
-        let test = keccakf1600(576, 1024, message, 0x06, 64);
+        let mut context: Context = Default::default();
+        let mut iter = message.chunks(context.rate_in_bytes);
 
-        let mut return_string = String::new();
-        for byte in test.iter() {
-            return_string.push_str(&format!("{:02x}", byte));
-        }
-        return_string
+        //if iter.next().is_none() {
+        //    context = keccakf1600_absorb(context, &[]);
+        //} else {
+        //    for chunk in message.chunks(context.rate_in_bytes) {
+        //        context = keccakf1600_absorb(context, chunk);
+        //    }
+        //}
+
+        //keccakf1600_squeeze(context)
+
+        keccakf1600(context, message)
     }
 
     fn hash_stream(mut stream: impl std::io::Read) -> std::io::Result<String> {
-        todo!()
+        let mut context = Context {
+            ..Default::default()
+        };
+        let mut buffer = vec![0u8; context.rate_in_bytes];
+
+        loop {
+            let bytes = stream.read(buffer.as_mut())?;
+            context = keccakf1600_absorb(context, &buffer[0..bytes]);
+
+            if bytes < context.rate_in_bytes {
+                break;
+            }
+        }
+
+        Ok(keccakf1600_squeeze(context))
     }
 }
 
