@@ -9,7 +9,7 @@ pub struct SHA3_384 {}
 pub struct SHA3_512 {}
 
 fn rol64(a: u64, offset: usize) -> u64 {
-    (a << offset) ^ (a >> 64 - offset)
+    (a << offset) ^ (a >> (64 - offset))
 }
 
 fn read_lane(state: &[u8], x: usize, y: usize) -> u64 {
@@ -29,11 +29,8 @@ fn read_lane(state: &[u8], x: usize, y: usize) -> u64 {
 
 fn write_lane(state: &mut [u8], x: usize, y: usize, lane: u64) {
     let index = (x + 5 * y) * 8;
-    let add_slice = lane.to_le_bytes();
 
-    for i in 0..8 {
-        state[index + i] = add_slice[i];
-    }
+    state[index..(8 + index)].copy_from_slice(&lane.to_le_bytes());
 }
 
 fn xor_lane(state: &mut [u8], x: usize, y: usize, lane: u64) {
@@ -50,9 +47,7 @@ fn xor_lane(state: &mut [u8], x: usize, y: usize, lane: u64) {
     ]) ^ lane)
         .to_le_bytes();
 
-    for i in 0..8 {
-        state[index + i] = xored_slice[i];
-    }
+    state[index..(8 + index)].copy_from_slice(&xored_slice);
 }
 
 fn lfsr86540(lfsr: &mut u8) -> bool {
@@ -63,7 +58,7 @@ fn lfsr86540(lfsr: &mut u8) -> bool {
     } else {
         (*lfsr) <<= 1;
     }
-    return result;
+    result
 }
 
 fn keccak_f1600_state_permute(state: &mut [u8]) {
@@ -73,8 +68,8 @@ fn keccak_f1600_state_permute(state: &mut [u8]) {
         let mut c = [0u64; 5];
         let mut d: u64;
 
-        for x in 0..5 {
-            c[x] = read_lane(state, x, 0)
+        for (x, lane) in c.iter_mut().enumerate() {
+            *lane = read_lane(state, x, 0)
                 ^ read_lane(state, x, 1)
                 ^ read_lane(state, x, 2)
                 ^ read_lane(state, x, 3)
@@ -112,8 +107,8 @@ fn keccak_f1600_state_permute(state: &mut [u8]) {
 
         for y in 0..5 {
             /* Take a copy of the plane */
-            for x in 0..5 {
-                temp[x] = read_lane(state, x, y);
+            for (x, temp_lane) in temp.iter_mut().enumerate() {
+                *temp_lane = read_lane(state, x, y);
             }
             /* Compute χ on the plane */
             for x in 0..5 {
@@ -142,7 +137,7 @@ fn keccakf1600(
     delimited_suffix: u8,
     mut digest_byte_size: usize,
 ) -> Vec<u8> {
-    assert!(rate % 8 == 0, "Rate must be divisible by 8.");
+    assert!(rate.is_multiple_of(8), "Rate must be divisible by 8.");
     assert!(
         rate + capacity == 1600,
         "Rate and capacity must add to 1600 bits."

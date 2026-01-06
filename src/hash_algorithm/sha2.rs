@@ -684,6 +684,7 @@ impl SHA2LargeContext for SHA512Context {
         SHA2LargeType::SHA2_512
     }
 }
+
 impl Default for SHA512Context {
     fn default() -> Self {
         Self {
@@ -1041,7 +1042,7 @@ fn private_small_hash_block<T: SHA2SmallContext>(mut context: T, original_data_b
         context.set_hash(Some(return_string));
     }
 
-    return context;
+    context
 }
 
 fn private_large_hash_block<T: SHA2LargeContext>(mut context: T, original_data_block: &[u8]) -> T {
@@ -1173,7 +1174,7 @@ fn private_large_hash_block<T: SHA2LargeContext>(mut context: T, original_data_b
         context.set_hash(Some(return_string));
     }
 
-    return context;
+    context
 }
 
 impl SHA224 {
@@ -1190,12 +1191,12 @@ impl Hash for SHA224 {
             context = Self::hash_block(context, chunk);
         }
 
-        if context.hash == None {
+        if context.hash.is_none() {
             context = Self::hash_block(context, &[])
         }
 
         // Cannot panic as a hash will always be produced.
-        return context.hash.unwrap();
+        context.hash.unwrap()
     }
 
     fn hash_stream(mut stream: impl std::io::Read) -> std::io::Result<String> {
@@ -1212,7 +1213,7 @@ impl Hash for SHA224 {
         }
 
         // Cannot panic as a hash will always be produced.
-        return Ok(context.hash.unwrap());
+        Ok(context.hash.unwrap())
     }
 }
 
@@ -1230,12 +1231,12 @@ impl Hash for SHA256 {
             context = Self::hash_block(context, chunk);
         }
 
-        if context.hash == None {
+        if context.hash.is_none() {
             context = Self::hash_block(context, &[])
         }
 
         // Cannot panic as a hash will always be produced.
-        return context.hash.unwrap();
+        context.hash.unwrap()
     }
 
     fn hash_stream(mut stream: impl std::io::Read) -> std::io::Result<String> {
@@ -1252,9 +1253,10 @@ impl Hash for SHA256 {
         }
 
         // Cannot panic as a hash will always be produced.
-        return Ok(context.hash.unwrap());
+        Ok(context.hash.unwrap())
     }
 }
+
 impl SHA384 {
     fn hash_block(context: SHA384Context, original_data_block: &[u8]) -> SHA384Context {
         self::private_large_hash_block(context, original_data_block)
@@ -1269,12 +1271,12 @@ impl Hash for SHA384 {
             context = Self::hash_block(context, chunk);
         }
 
-        if context.hash == None {
+        if context.hash.is_none() {
             context = Self::hash_block(context, &[])
         }
 
         // Cannot panic as a hash will always be produced.
-        return context.hash.unwrap();
+        context.hash.unwrap()
     }
 
     fn hash_stream(mut stream: impl std::io::Read) -> std::io::Result<String> {
@@ -1291,7 +1293,7 @@ impl Hash for SHA384 {
         }
 
         // Cannot panic as a hash will always be produced.
-        return Ok(context.hash.unwrap());
+        Ok(context.hash.unwrap())
     }
 }
 
@@ -1309,12 +1311,12 @@ impl Hash for SHA512 {
             context = Self::hash_block(context, chunk);
         }
 
-        if context.hash == None {
+        if context.hash.is_none() {
             context = Self::hash_block(context, &[])
         }
 
         // Cannot panic as a hash will always be produced.
-        return context.hash.unwrap();
+        context.hash.unwrap()
     }
 
     fn hash_stream(mut stream: impl std::io::Read) -> std::io::Result<String> {
@@ -1331,7 +1333,7 @@ impl Hash for SHA512 {
         }
 
         // Cannot panic as a hash will always be produced.
-        return Ok(context.hash.unwrap());
+        Ok(context.hash.unwrap())
     }
 }
 
@@ -1349,12 +1351,12 @@ impl Hash for SHA512_224 {
             context = Self::hash_block(context, chunk);
         }
 
-        if context.hash == None {
+        if context.hash.is_none() {
             context = Self::hash_block(context, &[])
         }
 
         // Cannot panic as a hash will always be produced.
-        return context.hash.unwrap();
+        context.hash.unwrap()
     }
 
     fn hash_stream(mut stream: impl std::io::Read) -> std::io::Result<String> {
@@ -1371,7 +1373,7 @@ impl Hash for SHA512_224 {
         }
 
         // Cannot panic as a hash will always be produced.
-        return Ok(context.hash.unwrap());
+        Ok(context.hash.unwrap())
     }
 }
 
@@ -1389,12 +1391,12 @@ impl Hash for SHA512_256 {
             context = Self::hash_block(context, chunk);
         }
 
-        if context.hash == None {
+        if context.hash.is_none() {
             context = Self::hash_block(context, &[])
         }
 
         // Cannot panic as a hash will always be produced.
-        return context.hash.unwrap();
+        context.hash.unwrap()
     }
 
     fn hash_stream(mut stream: impl std::io::Read) -> std::io::Result<String> {
@@ -1411,7 +1413,7 @@ impl Hash for SHA512_256 {
         }
 
         // Cannot panic as a hash will always be produced.
-        return Ok(context.hash.unwrap());
+        Ok(context.hash.unwrap())
     }
 }
 

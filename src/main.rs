@@ -141,7 +141,7 @@ impl State {
         while let Some(argument) = args_iter.next() {
             long_option = false;
 
-            assert!(argument.len() != 0, "Stdin argument was somehow empty??");
+            assert!(!argument.is_empty(), "Stdin argument was somehow empty??");
             let arg_slice = if argument.len() == 1 {
                 &argument[0..1]
             } else {
@@ -321,12 +321,12 @@ fn main() {
     let mut counter = 0;
     let mut no_args = false;
 
-    if state.arguments.len() == 0 {
+    if state.arguments.is_empty() {
         no_args = true;
     }
 
     loop {
-        let mut data: Vec<u8>;
+        let data: Vec<u8>;
         let hashed_result: String;
 
         if no_args || state.arguments[counter] == "-" {
@@ -361,7 +361,7 @@ fn main() {
                 Algorithm::SHA3_512 => SHA3_512::hash_slice,
             };
 
-            hashed_result = hash_function(&mut data);
+            hashed_result = hash_function(&data);
         } else {
             // Read data from file passed as argument
             let file_handle = match File::open(&state.arguments[counter]) {

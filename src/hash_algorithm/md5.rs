@@ -219,7 +219,7 @@ impl MD5 {
             context.hash = Some(return_string);
         }
 
-        return context;
+        context
     }
 }
 
@@ -231,12 +231,12 @@ impl Hash for MD5 {
             context = Self::hash_block(context, chunk);
         }
 
-        if context.hash == None {
+        if context.hash.is_none() {
             context = Self::hash_block(context, &[])
         }
 
         // Cannot panic as a hash will always be produced.
-        return context.hash.unwrap();
+        context.hash.unwrap()
     }
 
     fn hash_stream(mut stream: impl std::io::Read) -> std::io::Result<String> {
@@ -252,12 +252,12 @@ impl Hash for MD5 {
             }
         }
 
-        if context.hash == None {
+        if context.hash.is_none() {
             context = Self::hash_block(context, &[])
         }
 
         // Cannot panic as a hash will always be produced.
-        return Ok(context.hash.unwrap());
+        Ok(context.hash.unwrap())
     }
 }
 

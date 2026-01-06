@@ -101,7 +101,7 @@ impl SHA1 {
         let mut temp_d = context.d;
         let mut temp_e = context.e;
 
-        for i in 0..80 {
+        for (i, word) in words.iter().enumerate() {
             let f: u32;
             let k: u32;
 
@@ -124,7 +124,7 @@ impl SHA1 {
                 .wrapping_add(f)
                 .wrapping_add(temp_e)
                 .wrapping_add(k)
-                .wrapping_add(words[i]);
+                .wrapping_add(*word);
 
             temp_e = temp_d;
             temp_d = temp_c;
@@ -155,7 +155,7 @@ impl SHA1 {
             context.hash = Some(return_string);
         }
 
-        return context;
+        context
     }
 }
 
@@ -167,12 +167,12 @@ impl Hash for SHA1 {
             context = Self::hash_block(context, chunk);
         }
 
-        if context.hash == None {
+        if context.hash.is_none() {
             context = Self::hash_block(context, &[])
         }
 
         // Cannot panic as a hash will always be produced.
-        return context.hash.unwrap();
+        context.hash.unwrap()
     }
 
     fn hash_stream(mut stream: impl std::io::Read) -> std::io::Result<String> {
@@ -188,12 +188,12 @@ impl Hash for SHA1 {
             }
         }
 
-        if context.hash == None {
+        if context.hash.is_none() {
             context = Self::hash_block(context, &[])
         }
 
         // Cannot panic as a hash will always be produced.
-        return Ok(context.hash.unwrap());
+        Ok(context.hash.unwrap())
     }
 }
 
