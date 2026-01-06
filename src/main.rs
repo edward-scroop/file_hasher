@@ -6,6 +6,7 @@ use crate::hash_algorithm::{
     md5::MD5,
     sha1::SHA1,
     sha2::{SHA224, SHA256, SHA384, SHA512, SHA512_224, SHA512_256},
+    sha3::{SHA3_224, SHA3_256, SHA3_384, SHA3_512},
 };
 use std::{
     env::{self},
@@ -47,7 +48,11 @@ DIGEST determines the digest algorithm and default output format:
     sha384
     sha512
     sha512224
-    sha512256";
+    sha512256
+    sha3224
+    sha3256
+    sha3384
+    sha3512";
 const HELP_INFO_STRING: &str = "Try 'hashsum --help' for more information.";
 const HELP_ALGORITHM_ARGUMENTS: &str = "Valid arguments are:
     - 'md5'
@@ -57,7 +62,11 @@ const HELP_ALGORITHM_ARGUMENTS: &str = "Valid arguments are:
     - 'sha384'
     - 'sha512'
     - 'sha512224'
-    - 'sha512256'";
+    - 'sha512256'
+    - 'sha3224'
+    - 'sha3256'
+    - 'sha3384'
+    - 'sha3512'";
 
 fn print_help_unrecognised_option(arg: impl Display) {
     eprintln!("hashsum: unrecognised option '{arg}'\n{HELP_INFO_STRING}");
@@ -111,6 +120,10 @@ enum Algorithm {
     SHA512,
     SHA512_224,
     SHA512_256,
+    SHA3_224,
+    SHA3_256,
+    SHA3_384,
+    SHA3_512,
 }
 
 impl State {
@@ -149,6 +162,10 @@ impl State {
                                 "sha512" => Algorithm::SHA512,
                                 "sha512224" => Algorithm::SHA512_224,
                                 "sha512256" => Algorithm::SHA512_256,
+                                "sha3224" => Algorithm::SHA3_224,
+                                "sha3256" => Algorithm::SHA3_256,
+                                "sha3384" => Algorithm::SHA3_384,
+                                "sha3512" => Algorithm::SHA3_512,
                                 _ => {
                                     print_help_invalid_argument(
                                         arg,
@@ -175,6 +192,10 @@ impl State {
                             "sha512" => Algorithm::SHA512,
                             "sha512224" => Algorithm::SHA512_224,
                             "sha512256" => Algorithm::SHA512_256,
+                            "sha3224" => Algorithm::SHA3_224,
+                            "sha3256" => Algorithm::SHA3_256,
+                            "sha3384" => Algorithm::SHA3_384,
+                            "sha3512" => Algorithm::SHA3_512,
                             _ => {
                                 print_help_invalid_argument(
                                     argument,
@@ -224,6 +245,10 @@ impl State {
                             "sha512" => Algorithm::SHA512,
                             "sha512224" => Algorithm::SHA512_224,
                             "sha512256" => Algorithm::SHA512_256,
+                            "sha3224" => Algorithm::SHA3_224,
+                            "sha3256" => Algorithm::SHA3_256,
+                            "sha3384" => Algorithm::SHA3_384,
+                            "sha3512" => Algorithm::SHA3_512,
                             _ => {
                                 print_help_invalid_argument(
                                     arg,
@@ -260,6 +285,10 @@ impl State {
                             "sha512" => Algorithm::SHA512,
                             "sha512224" => Algorithm::SHA512_224,
                             "sha512256" => Algorithm::SHA512_256,
+                            "sha3224" => Algorithm::SHA3_224,
+                            "sha3256" => Algorithm::SHA3_256,
+                            "sha3384" => Algorithm::SHA3_384,
+                            "sha3512" => Algorithm::SHA3_512,
                             _ => {
                                 print_help_invalid_argument(
                                     &argument[12..argument.len()],
@@ -326,6 +355,10 @@ fn main() {
                 Algorithm::SHA512 => SHA512::hash_slice,
                 Algorithm::SHA512_224 => SHA512_224::hash_slice,
                 Algorithm::SHA512_256 => SHA512_256::hash_slice,
+                Algorithm::SHA3_224 => SHA3_224::hash_slice,
+                Algorithm::SHA3_256 => SHA3_256::hash_slice,
+                Algorithm::SHA3_384 => SHA3_384::hash_slice,
+                Algorithm::SHA3_512 => SHA3_512::hash_slice,
             };
 
             hashed_result = hash_function(&mut data);
