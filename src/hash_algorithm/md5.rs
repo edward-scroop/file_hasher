@@ -267,66 +267,43 @@ mod tests {
 
     #[test]
     fn empty_hash() {
-        let test_vec = Vec::new();
-
-        assert_eq!(
-            MD5::hash_slice(&test_vec),
-            "d41d8cd98f00b204e9800998ecf8427e"
-        );
+        assert_eq!(MD5::hash_slice(&[]), "d41d8cd98f00b204e9800998ecf8427e");
     }
 
     #[test]
     fn rfc_hash_suite() {
-        let mut test_vec = Vec::new();
-        test_vec.extend_from_slice("a".as_bytes());
-
         assert_eq!(
-            MD5::hash_slice(&test_vec),
+            MD5::hash_slice("a".as_bytes()),
             "0cc175b9c0f1b6a831c399e269772661"
         );
 
-        test_vec.clear();
-        test_vec.extend_from_slice("abc".as_bytes());
-
         assert_eq!(
-            MD5::hash_slice(&test_vec),
+            MD5::hash_slice("abc".as_bytes()),
             "900150983cd24fb0d6963f7d28e17f72"
         );
 
-        test_vec.clear();
-        test_vec.extend_from_slice("message digest".as_bytes());
-
         assert_eq!(
-            MD5::hash_slice(&test_vec),
+            MD5::hash_slice("message digest".as_bytes()),
             "f96b697d7cb7938d525a2f31aaf161d0"
         );
 
-        test_vec.clear();
-        test_vec.extend_from_slice("abcdefghijklmnopqrstuvwxyz".as_bytes());
-
         assert_eq!(
-            MD5::hash_slice(&test_vec),
+            MD5::hash_slice("abcdefghijklmnopqrstuvwxyz".as_bytes()),
             "c3fcd3d76192e4007dfb496cca67e13b"
         );
 
-        test_vec.clear();
-        test_vec.extend_from_slice(
-            "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789".as_bytes(),
-        );
-
         assert_eq!(
-            MD5::hash_slice(&test_vec),
+            MD5::hash_slice(
+                "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789".as_bytes()
+            ),
             "d174ab98d277d9f5a5611c2c9f419d9f"
         );
 
-        test_vec.clear();
-        test_vec.extend_from_slice(
-            "12345678901234567890123456789012345678901234567890123456789012345678901234567890"
-                .as_bytes(),
-        );
-
         assert_eq!(
-            MD5::hash_slice(&test_vec),
+            MD5::hash_slice(
+                "12345678901234567890123456789012345678901234567890123456789012345678901234567890"
+                    .as_bytes()
+            ),
             "57edf4a22be3c955ac49da2e2107b67a"
         );
     }

@@ -1423,338 +1423,238 @@ mod tests {
 
     #[test]
     fn sha224_empty_hash() {
-        let test_vec = Vec::new();
-
         assert_eq!(
-            SHA224::hash_slice(&test_vec),
+            SHA224::hash_slice(&[]),
             "d14a028c2a3a2bc9476102bb288234c415a2b01f828ea62ac5b3e42f"
         );
     }
 
     #[test]
     fn sha256_empty_hash() {
-        let test_vec = Vec::new();
-
         assert_eq!(
-            SHA256::hash_slice(&test_vec),
+            SHA256::hash_slice(&[]),
             "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
         );
     }
 
     #[test]
     fn sha384_empty_hash() {
-        let test_vec = Vec::new();
-
         assert_eq!(
-            SHA384::hash_slice(&test_vec),
+            SHA384::hash_slice(&[]),
             "38b060a751ac96384cd9327eb1b1e36a21fdb71114be07434c0cc7bf63f6e1da274edebfe76f65fbd51ad2f14898b95b"
         );
     }
 
     #[test]
     fn sha512_empty_hash() {
-        let test_vec = Vec::new();
-
         assert_eq!(
-            SHA512::hash_slice(&test_vec),
+            SHA512::hash_slice(&[]),
             "cf83e1357eefb8bdf1542850d66d8007d620e4050b5715dc83f4a921d36ce9ce47d0d13c5d85f2b0ff8318d2877eec2f63b931bd47417a81a538327af927da3e"
         );
     }
 
     #[test]
     fn sha512_224_empty_hash() {
-        let test_vec = Vec::new();
-
         assert_eq!(
-            SHA512_224::hash_slice(&test_vec),
+            SHA512_224::hash_slice(&[]),
             "6ed0dd02806fa89e25de060c19d3ac86cabb87d6a0ddd05c333b84f4"
         );
     }
 
     #[test]
     fn sha512_256_empty_hash() {
-        let test_vec = Vec::new();
-
         assert_eq!(
-            SHA512_256::hash_slice(&test_vec),
+            SHA512_256::hash_slice(&[]),
             "c672b8d1ef56ed28ab87c3622c5114069bdd3ad7b8f9737498d0c01ecef0967a"
         );
     }
 
     #[test]
     fn sha224_rfc_hash_suite() {
-        let mut test_vec = Vec::new();
-        test_vec.extend_from_slice("abc".as_bytes());
-
         assert_eq!(
-            SHA224::hash_slice(&test_vec),
+            SHA224::hash_slice("abc".as_bytes()),
             "23097d223405d8228642a477bda255b32aadbce4bda0b3f7e36c9da7"
         );
 
-        test_vec.clear();
-        test_vec.extend_from_slice(
-            "abcdbcdecdefdefgefghfghighijhijkijkljklmklmnlmnomnopnopq".as_bytes(),
-        );
-
         assert_eq!(
-            SHA224::hash_slice(&test_vec),
+            SHA224::hash_slice(
+                "abcdbcdecdefdefgefghfghighijhijkijkljklmklmnlmnomnopnopq".as_bytes()
+            ),
             "75388b16512776cc5dba5da1fd890150b0c6455cb4f58b1952522525"
         );
 
-        test_vec.clear();
-        test_vec.extend_from_slice(["a"; 1000000].concat().as_bytes());
-
         assert_eq!(
-            SHA224::hash_slice(&test_vec),
+            SHA224::hash_slice(["a"; 1000000].concat().as_bytes()),
             "20794655980c91d8bbb4c1ea97618a4bf03f42581948b2ee4ee7ad67"
         );
 
-        test_vec.clear();
-        test_vec.extend_from_slice(
-            ["0123456701234567012345670123456701234567012345670123456701234567"; 10]
-                .concat()
-                .as_bytes(),
-        );
-
         assert_eq!(
-            SHA224::hash_slice(&test_vec),
+            SHA224::hash_slice(
+                ["0123456701234567012345670123456701234567012345670123456701234567"; 10]
+                    .concat()
+                    .as_bytes()
+            ),
             "567f69f168cd7844e65259ce658fe7aadfa25216e68eca0eb7ab8262"
         );
 
-        test_vec.clear();
-        test_vec.extend_from_slice("\x07".as_bytes());
-
         assert_eq!(
-            SHA224::hash_slice(&test_vec),
+            SHA224::hash_slice("\x07".as_bytes()),
             "00ecd5f138422b8ad74c9799fd826c531bad2fcabc7450bee2aa8c2a"
         );
     }
 
     #[test]
     fn sha256_rfc_hash_suite() {
-        let mut test_vec = Vec::new();
-        test_vec.extend_from_slice("abc".as_bytes());
-
         assert_eq!(
-            SHA256::hash_slice(&test_vec),
+            SHA256::hash_slice("abc".as_bytes()),
             "ba7816bf8f01cfea414140de5dae2223b00361a396177a9cb410ff61f20015ad"
         );
 
-        test_vec.clear();
-        test_vec.extend_from_slice(
-            "abcdbcdecdefdefgefghfghighijhijkijkljklmklmnlmnomnopnopq".as_bytes(),
-        );
-
         assert_eq!(
-            SHA256::hash_slice(&test_vec),
+            SHA256::hash_slice(
+                "abcdbcdecdefdefgefghfghighijhijkijkljklmklmnlmnomnopnopq".as_bytes()
+            ),
             "248d6a61d20638b8e5c026930c3e6039a33ce45964ff2167f6ecedd419db06c1"
         );
 
-        test_vec.clear();
-        test_vec.extend_from_slice(["a"; 1000000].concat().as_bytes());
-
         assert_eq!(
-            SHA256::hash_slice(&test_vec),
+            SHA256::hash_slice(["a"; 1000000].concat().as_bytes()),
             "cdc76e5c9914fb9281a1c7e284d73e67f1809a48a497200e046d39ccc7112cd0"
         );
 
-        test_vec.clear();
-        test_vec.extend_from_slice(
-            ["0123456701234567012345670123456701234567012345670123456701234567"; 10]
-                .concat()
-                .as_bytes(),
-        );
-
         assert_eq!(
-            SHA256::hash_slice(&test_vec),
+            SHA256::hash_slice(
+                ["0123456701234567012345670123456701234567012345670123456701234567"; 10]
+                    .concat()
+                    .as_bytes()
+            ),
             "594847328451bdfa85056225462cc1d867d877fb388df0ce35f25ab5562bfbb5"
         );
 
-        test_vec.clear();
-        test_vec.extend_from_slice("\x19".as_bytes());
-
         assert_eq!(
-            SHA256::hash_slice(&test_vec),
+            SHA256::hash_slice("\x19".as_bytes()),
             "68aa2e2ee5dff96e3355e6c7ee373e3d6a4e17f75f9518d843709c0c9bc3e3d4"
         );
     }
 
     #[test]
     fn sha384_rfc_hash_suite() {
-        let mut test_vec = Vec::new();
-        test_vec.extend_from_slice("abc".as_bytes());
-
         assert_eq!(
-            SHA384::hash_slice(&test_vec),
+            SHA384::hash_slice("abc".as_bytes()),
             "cb00753f45a35e8bb5a03d699ac65007272c32ab0eded1631a8b605a43ff5bed8086072ba1e7cc2358baeca134c825a7"
         );
 
-        test_vec.clear();
-        test_vec.extend_from_slice(
-            "abcdefghbcdefghicdefghijdefghijkefghijklfghijklmghijklmnhijklmnoijklmnopjklmnopqklmnopqrlmnopqrsmnopqrstnopqrstu".as_bytes(),
-        );
-
         assert_eq!(
-            SHA384::hash_slice(&test_vec),
+            SHA384::hash_slice("abcdefghbcdefghicdefghijdefghijkefghijklfghijklmghijklmnhijklmnoijklmnopjklmnopqklmnopqrlmnopqrsmnopqrstnopqrstu".as_bytes()),
             "09330c33f71147e83d192fc782cd1b4753111b173b3b05d22fa08086e3b0f712fcc7c71a557e2db966c3e9fa91746039"
         );
 
-        test_vec.clear();
-        test_vec.extend_from_slice(["a"; 1000000].concat().as_bytes());
-
         assert_eq!(
-            SHA384::hash_slice(&test_vec),
+            SHA384::hash_slice(["a"; 1000000].concat().as_bytes()),
             "9d0e1809716474cb086e834e310a4a1ced149e9c00f248527972cec5704c2a5b07b8b3dc38ecc4ebae97ddd87f3d8985"
         );
 
-        test_vec.clear();
-        test_vec.extend_from_slice(
-            ["0123456701234567012345670123456701234567012345670123456701234567"; 10]
-                .concat()
-                .as_bytes(),
-        );
-
         assert_eq!(
-            SHA384::hash_slice(&test_vec),
+            SHA384::hash_slice(
+                ["0123456701234567012345670123456701234567012345670123456701234567"; 10]
+                    .concat()
+                    .as_bytes()
+            ),
             "2fc64a4f500ddb6828f6a3430b8dd72a368eb7f3a8322a70bc84275b9c0b3ab00d27a5cc3c2d224aa6b61a0d79fb4596"
         );
     }
 
     #[test]
     fn sha512_rfc_hash_suite() {
-        let mut test_vec = Vec::new();
-        test_vec.extend_from_slice("abc".as_bytes());
-
         assert_eq!(
-            SHA512::hash_slice(&test_vec),
+            SHA512::hash_slice("abc".as_bytes()),
             "ddaf35a193617abacc417349ae20413112e6fa4e89a97ea20a9eeee64b55d39a2192992a274fc1a836ba3c23a3feebbd454d4423643ce80e2a9ac94fa54ca49f"
         );
 
-        test_vec.clear();
-        test_vec.extend_from_slice(
-            "abcdefghbcdefghicdefghijdefghijkefghijklfghijklmghijklmnhijklmnoijklmnopjklmnopqklmnopqrlmnopqrsmnopqrstnopqrstu".as_bytes(),
-        );
-
         assert_eq!(
-            SHA512::hash_slice(&test_vec),
+            SHA512::hash_slice("abcdefghbcdefghicdefghijdefghijkefghijklfghijklmghijklmnhijklmnoijklmnopjklmnopqklmnopqrlmnopqrsmnopqrstnopqrstu".as_bytes()),
             "8e959b75dae313da8cf4f72814fc143f8f7779c6eb9f7fa17299aeadb6889018501d289e4900f7e4331b99dec4b5433ac7d329eeb6dd26545e96e55b874be909"
         );
 
-        test_vec.clear();
-        test_vec.extend_from_slice(["a"; 1000000].concat().as_bytes());
-
         assert_eq!(
-            SHA512::hash_slice(&test_vec),
+            SHA512::hash_slice(["a"; 1000000].concat().as_bytes()),
             "e718483d0ce769644e2e42c7bc15b4638e1f98b13b2044285632a803afa973ebde0ff244877ea60a4cb0432ce577c31beb009c5c2c49aa2e4eadb217ad8cc09b"
         );
 
-        test_vec.clear();
-        test_vec.extend_from_slice(
-            ["0123456701234567012345670123456701234567012345670123456701234567"; 10]
-                .concat()
-                .as_bytes(),
-        );
-
         assert_eq!(
-            SHA512::hash_slice(&test_vec),
+            SHA512::hash_slice(
+                ["0123456701234567012345670123456701234567012345670123456701234567"; 10]
+                    .concat()
+                    .as_bytes()
+            ),
             "89d05ba632c699c31231ded4ffc127d5a894dad412c0e024db872d1abd2ba8141a0f85072a9be1e2aa04cf33c765cb510813a39cd5a84c4acaa64d3f3fb7bae9"
         );
     }
 
     #[test]
     fn sha512_224_rfc_hash_suite_like() {
-        let mut test_vec = Vec::new();
-        test_vec.extend_from_slice("abc".as_bytes());
-
         assert_eq!(
-            SHA512_224::hash_slice(&test_vec),
+            SHA512_224::hash_slice("abc".as_bytes()),
             "4634270f707b6a54daae7530460842e20e37ed265ceee9a43e8924aa"
         );
 
-        test_vec.clear();
-        test_vec.extend_from_slice(
-            "abcdbcdecdefdefgefghfghighijhijkijkljklmklmnlmnomnopnopq".as_bytes(),
-        );
-
         assert_eq!(
-            SHA512_224::hash_slice(&test_vec),
+            SHA512_224::hash_slice(
+                "abcdbcdecdefdefgefghfghighijhijkijkljklmklmnlmnomnopnopq".as_bytes()
+            ),
             "e5302d6d54bb242275d1e7622d68df6eb02dedd13f564c13dbda2174"
         );
 
-        test_vec.clear();
-        test_vec.extend_from_slice(["a"; 1000000].concat().as_bytes());
-
         assert_eq!(
-            SHA512_224::hash_slice(&test_vec),
+            SHA512_224::hash_slice(["a"; 1000000].concat().as_bytes()),
             "37ab331d76f0d36de422bd0edeb22a28accd487b7a8453ae965dd287"
         );
 
-        test_vec.clear();
-        test_vec.extend_from_slice(
-            ["0123456701234567012345670123456701234567012345670123456701234567"; 10]
-                .concat()
-                .as_bytes(),
-        );
-
         assert_eq!(
-            SHA512_224::hash_slice(&test_vec),
+            SHA512_224::hash_slice(
+                ["0123456701234567012345670123456701234567012345670123456701234567"; 10]
+                    .concat()
+                    .as_bytes()
+            ),
             "406338c163ad81f50d6b4c9bb45240c5d706b498863404bab6b84938"
         );
 
-        test_vec.clear();
-        test_vec.extend_from_slice("\x07".as_bytes());
-
         assert_eq!(
-            SHA512_224::hash_slice(&test_vec),
+            SHA512_224::hash_slice("\x07".as_bytes()),
             "a7bbe21f5a6f088c8f8de08b72ffc4c1333a29eedd8e26755bdd97c0"
         );
     }
 
     #[test]
     fn sha512_256_rfc_hash_suite_like() {
-        let mut test_vec = Vec::new();
-        test_vec.extend_from_slice("abc".as_bytes());
-
         assert_eq!(
-            SHA512_256::hash_slice(&test_vec),
+            SHA512_256::hash_slice("abc".as_bytes()),
             "53048e2681941ef99b2e29b76b4c7dabe4c2d0c634fc6d46e0e2f13107e7af23"
         );
 
-        test_vec.clear();
-        test_vec.extend_from_slice(
-            "abcdbcdecdefdefgefghfghighijhijkijkljklmklmnlmnomnopnopq".as_bytes(),
-        );
-
         assert_eq!(
-            SHA512_256::hash_slice(&test_vec),
+            SHA512_256::hash_slice(
+                "abcdbcdecdefdefgefghfghighijhijkijkljklmklmnlmnomnopnopq".as_bytes()
+            ),
             "bde8e1f9f19bb9fd3406c90ec6bc47bd36d8ada9f11880dbc8a22a7078b6a461"
         );
 
-        test_vec.clear();
-        test_vec.extend_from_slice(["a"; 1000000].concat().as_bytes());
-
         assert_eq!(
-            SHA512_256::hash_slice(&test_vec),
+            SHA512_256::hash_slice(["a"; 1000000].concat().as_bytes()),
             "9a59a052930187a97038cae692f30708aa6491923ef5194394dc68d56c74fb21"
         );
 
-        test_vec.clear();
-        test_vec.extend_from_slice(
-            ["0123456701234567012345670123456701234567012345670123456701234567"; 10]
-                .concat()
-                .as_bytes(),
-        );
-
         assert_eq!(
-            SHA512_256::hash_slice(&test_vec),
+            SHA512_256::hash_slice(
+                ["0123456701234567012345670123456701234567012345670123456701234567"; 10]
+                    .concat()
+                    .as_bytes()
+            ),
             "cf78e4ba935b4d9eb91052aeddf8e2d606c590f708573693ea94be826a666ee4"
         );
 
-        test_vec.clear();
-        test_vec.extend_from_slice("\x19".as_bytes());
-
         assert_eq!(
-            SHA512_256::hash_slice(&test_vec),
+            SHA512_256::hash_slice("\x19".as_bytes()),
             "b92633716453b7b7fd33c83e5707e6c135c4a91a19d161b93307b93ba5bdf434"
         );
     }

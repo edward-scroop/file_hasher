@@ -203,53 +203,36 @@ mod tests {
 
     #[test]
     fn empty_hash() {
-        let test_vec = Vec::new();
-
         assert_eq!(
-            SHA1::hash_slice(&test_vec),
+            SHA1::hash_slice(&[]),
             "da39a3ee5e6b4b0d3255bfef95601890afd80709"
         );
     }
 
     #[test]
     fn rfc_hash_suite() {
-        let mut test_vec = Vec::new();
-        test_vec.extend_from_slice("abc".as_bytes());
-
         assert_eq!(
-            SHA1::hash_slice(&test_vec),
-            "a9993e364706816aba3e25717850c26c9cd0d89d"
-        );
-
-        test_vec.clear();
-        test_vec.extend_from_slice("abcdbcdecdefdefgefghfghighijhi".as_bytes());
-
-        assert_eq!(
-            SHA1::hash_slice(&test_vec),
-            "f9537c23893d2014f365adf8ffe33b8eb0297ed1"
-        );
-
-        test_vec.clear();
-        test_vec.extend_from_slice("jkijkljklmklmnlmnomnopnopq".as_bytes());
-
-        assert_eq!(
-            SHA1::hash_slice(&test_vec),
-            "346fb528a24b48f563cb061470bcfd23740427ad"
-        );
-
-        test_vec.clear();
-        test_vec.extend_from_slice("a".as_bytes());
-
-        assert_eq!(
-            SHA1::hash_slice(&test_vec),
+            SHA1::hash_slice("a".as_bytes()),
             "86f7e437faa5a7fce15d1ddcb9eaeaea377667b8"
         );
 
-        test_vec.clear();
-        test_vec.extend_from_slice("01234567012345670123456701234567".as_bytes());
+        assert_eq!(
+            SHA1::hash_slice("abc".as_bytes()),
+            "a9993e364706816aba3e25717850c26c9cd0d89d"
+        );
 
         assert_eq!(
-            SHA1::hash_slice(&test_vec),
+            SHA1::hash_slice("abcdbcdecdefdefgefghfghighijhi".as_bytes()),
+            "f9537c23893d2014f365adf8ffe33b8eb0297ed1"
+        );
+
+        assert_eq!(
+            SHA1::hash_slice("jkijkljklmklmnlmnomnopnopq".as_bytes()),
+            "346fb528a24b48f563cb061470bcfd23740427ad"
+        );
+
+        assert_eq!(
+            SHA1::hash_slice("01234567012345670123456701234567".as_bytes()),
             "c729c8996ee0a6f74f4f3248e8957edf704fb624"
         );
     }
