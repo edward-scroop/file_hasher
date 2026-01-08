@@ -3,6 +3,7 @@
 
 use crate::hash_algorithm::{
     Hash,
+    fnv::{FNV32, FNV32a, FNV64, FNV64a},
     md5::MD5,
     sha1::SHA1,
     sha2::{SHA224, SHA256, SHA384, SHA512, SHA512_224, SHA512_256},
@@ -52,7 +53,11 @@ DIGEST determines the digest algorithm and default output format:
     sha3224
     sha3256
     sha3384
-    sha3512";
+    sha3512
+    fnv32
+    fnv32a
+    fnv64
+    fnv64a";
 const HELP_INFO_STRING: &str = "Try 'hashsum --help' for more information.";
 const HELP_ALGORITHM_ARGUMENTS: &str = "Valid arguments are:
     - 'md5'
@@ -66,7 +71,11 @@ const HELP_ALGORITHM_ARGUMENTS: &str = "Valid arguments are:
     - 'sha3224'
     - 'sha3256'
     - 'sha3384'
-    - 'sha3512'";
+    - 'sha3512'
+    - 'fnv32'
+    - 'fnv32a'
+    - 'fnv64'
+    - 'fnv64a'";
 
 fn print_help_unrecognised_option(arg: impl Display) {
     eprintln!("hashsum: unrecognised option '{arg}'\n{HELP_INFO_STRING}");
@@ -124,6 +133,10 @@ enum Algorithm {
     SHA3_256,
     SHA3_384,
     SHA3_512,
+    FNV32,
+    FNV32a,
+    FNV64,
+    FNV64a,
 }
 
 impl State {
@@ -166,6 +179,10 @@ impl State {
                                 "sha3256" => Algorithm::SHA3_256,
                                 "sha3384" => Algorithm::SHA3_384,
                                 "sha3512" => Algorithm::SHA3_512,
+                                "fnv32" => Algorithm::FNV32,
+                                "fnv32a" => Algorithm::FNV32a,
+                                "fnv64" => Algorithm::FNV64,
+                                "fnv64a" => Algorithm::FNV64a,
                                 _ => {
                                     print_help_invalid_argument(
                                         arg,
@@ -196,6 +213,10 @@ impl State {
                             "sha3256" => Algorithm::SHA3_256,
                             "sha3384" => Algorithm::SHA3_384,
                             "sha3512" => Algorithm::SHA3_512,
+                            "fnv32" => Algorithm::FNV32,
+                            "fnv32a" => Algorithm::FNV32a,
+                            "fnv64" => Algorithm::FNV64,
+                            "fnv64a" => Algorithm::FNV64a,
                             _ => {
                                 print_help_invalid_argument(
                                     argument,
@@ -249,6 +270,10 @@ impl State {
                             "sha3256" => Algorithm::SHA3_256,
                             "sha3384" => Algorithm::SHA3_384,
                             "sha3512" => Algorithm::SHA3_512,
+                            "fnv32" => Algorithm::FNV32,
+                            "fnv32a" => Algorithm::FNV32a,
+                            "fnv64" => Algorithm::FNV64,
+                            "fnv64a" => Algorithm::FNV64a,
                             _ => {
                                 print_help_invalid_argument(
                                     arg,
@@ -289,6 +314,10 @@ impl State {
                             "sha3256" => Algorithm::SHA3_256,
                             "sha3384" => Algorithm::SHA3_384,
                             "sha3512" => Algorithm::SHA3_512,
+                            "fnv32" => Algorithm::FNV32,
+                            "fnv32a" => Algorithm::FNV32a,
+                            "fnv64" => Algorithm::FNV64,
+                            "fnv64a" => Algorithm::FNV64a,
                             _ => {
                                 print_help_invalid_argument(
                                     &argument[12..argument.len()],
@@ -359,6 +388,10 @@ fn main() {
                 Algorithm::SHA3_256 => SHA3_256::hash_slice,
                 Algorithm::SHA3_384 => SHA3_384::hash_slice,
                 Algorithm::SHA3_512 => SHA3_512::hash_slice,
+                Algorithm::FNV32 => FNV32::hash_slice,
+                Algorithm::FNV32a => FNV32a::hash_slice,
+                Algorithm::FNV64 => FNV64::hash_slice,
+                Algorithm::FNV64a => FNV64a::hash_slice,
             };
 
             hashed_result = hash_function(&data);
@@ -373,8 +406,26 @@ fn main() {
             };
 
             let message = BufReader::with_capacity(FILE_BUFFER, file_handle);
+            let hash_function = match state.algorithm {
+                Algorithm::MD5 => MD5::hash_stream,
+                Algorithm::SHA1 => SHA1::hash_stream,
+                Algorithm::SHA224 => SHA224::hash_stream,
+                Algorithm::SHA256 => SHA256::hash_stream,
+                Algorithm::SHA384 => SHA384::hash_stream,
+                Algorithm::SHA512 => SHA512::hash_stream,
+                Algorithm::SHA512_224 => SHA512_224::hash_stream,
+                Algorithm::SHA512_256 => SHA512_256::hash_stream,
+                Algorithm::SHA3_224 => SHA3_224::hash_stream,
+                Algorithm::SHA3_256 => SHA3_256::hash_stream,
+                Algorithm::SHA3_384 => SHA3_384::hash_stream,
+                Algorithm::SHA3_512 => SHA3_512::hash_stream,
+                Algorithm::FNV32 => FNV32::hash_stream,
+                Algorithm::FNV32a => FNV32a::hash_stream,
+                Algorithm::FNV64 => FNV64::hash_stream,
+                Algorithm::FNV64a => FNV64a::hash_stream,
+            };
 
-            hashed_result = match MD5::hash_stream(message) {
+            hashed_result = match hash_function(message) {
                 Ok(f) => f,
                 Err(e) => {
                     eprintln!("Error opening file {}: {}", state.arguments[counter], e);

@@ -3,6 +3,7 @@
 
 use std::io::Read;
 
+pub mod fnv;
 pub mod md5;
 pub mod sha1;
 pub mod sha2;
