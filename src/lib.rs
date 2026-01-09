@@ -5,15 +5,11 @@ use std::{env, fmt::Display, process};
 
 pub mod hash_algorithm;
 
-#[allow(dead_code)]
 pub const VERSION_MAJOR: usize = 0;
-#[allow(dead_code)]
 pub const VERSION_MIN: usize = 1;
-#[allow(dead_code)]
 pub const VERSION_PATCH: usize = 0;
 pub const KIB: usize = 1024;
 pub const MIB: usize = 1024 * KIB;
-#[allow(dead_code)]
 pub const GIB: usize = 1024 * MIB;
 pub const FILE_BUFFER: usize = 512 * MIB;
 const HELP_STRING: &str = "Usage: hashsum [OPTION]... [FILE]...
