@@ -162,11 +162,7 @@ fn keccakf1600_absorb(mut context: Context, message: &[u8]) -> Context {
     );
 
     let input_bytes = message.len();
-    let block_size = if input_bytes < context.rate_in_bytes {
-        input_bytes
-    } else {
-        context.rate_in_bytes
-    };
+    let block_size = usize::min(input_bytes, context.rate_in_bytes);
 
     for (i, message_word) in message.iter().enumerate().take(block_size) {
         context.state[i] ^= message_word;
@@ -201,11 +197,7 @@ fn keccakf1600_squeeze(mut context: Context) -> String {
     keccak_f1600_state_permute(context.state.as_mut());
 
     while context.digest_byte_size > 0 {
-        let block_size = if context.digest_byte_size < context.rate_in_bytes {
-            context.digest_byte_size
-        } else {
-            context.rate_in_bytes
-        };
+        let block_size = usize::min(context.digest_byte_size, context.rate_in_bytes);
 
         for byte in &context.state[0..block_size] {
             return_string.push_str(&format!("{:02x}", byte));
