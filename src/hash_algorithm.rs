@@ -8,6 +8,7 @@ pub mod md5;
 pub mod sha1;
 pub mod sha2;
 pub mod sha3;
+pub mod siphash;
 
 pub trait Hash {
     fn hash_slice(message: &[u8]) -> String;
